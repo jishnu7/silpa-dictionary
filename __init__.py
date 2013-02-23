@@ -22,4 +22,3 @@
 # URL: http://www.smc.org.in
 
 from dictionary import *
-

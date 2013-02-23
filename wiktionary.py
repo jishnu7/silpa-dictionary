@@ -28,60 +28,64 @@ from BeautifulSoup import BeautifulSoup
 
 __all__ = ['get_def']
 
-def get_def(word, src_lang,dest_lang):
-    quotedfilename = urllib.quote(word.encode('utf-8')) 
-    link = "http://"+dest_lang.split('_')[0]+".wiktionary.org/w/api.php?action=parse&format=xml&prop=text|revid|displaytitle&callback=?&page="+quotedfilename
+
+def get_def(word, src_lang, dest_lang):
+    quotedfilename = urllib.quote(word.encode('utf-8'))
+    link = "http://" + dest_lang.split('_')[0] + \
+    ".wiktionary.org/w/api.php?action=parse&format=xml&prop=text|revid|displaytitle&callback=?&page=" + quotedfilename
     opener = urllib2.build_opener()
     opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-    soup=None
+    soup = None
     meanings = None
     try:
         soup = BeautifulSoup(opener.open(link).read())
-        text=  BeautifulSoup(bs_preprocess(soup('text')[0].string))
+        text = BeautifulSoup(bs_preprocess(soup('text')[0].string))
 
         for li in text('li'):
             try:
-                if meanings==None:
-                    meanings =""
+                if meanings == None:
+                    meanings = ""
 
                 a = li('a')
 
-                if isinstance(a,list):
+                if isinstance(a, list):
                     for link in a:
-                        meanings += link.string+"\n"
+                        meanings += link.string + "\n"
                 elif li.a:
-                    meanings+=li.a.string+"\n"
-                else:    
-                    meanings+=li.string+"\n"
+                    meanings += li.a.string + "\n"
+                else:
+                    meanings += li.string + "\n"
 
             except:
-                pass   
-        if meanings!= None:
+                pass
+        if meanings != None:
             if src_lang == "ml_IN":
                 meanings = normalize_ml(meanings)
             meanings = meanings.rstrip('\n')
             return meanings
     except:
         pass
-    
+
     return None
 
+
 def bs_preprocess(html):
-    html = html.replace("&lt;","<")
-    html = html.replace("&gt;",">")
-    html = html.replace('&quot;','\'')
-    return html 
-        
-def normalize_ml (text):
-    text = text.replace(u"ൺ" , u"ണ്‍")
+    html = html.replace("&lt;", "<")
+    html = html.replace("&gt;", ">")
+    html = html.replace('&quot;', '\'')
+    return html
+
+
+def normalize_ml(text):
+    text = text.replace(u"ൺ", u"ണ്‍")
     text = text.replace(u"ൻ", u"ന്‍")
     text = text.replace(u"ർ", u"ര്‍")
     text = text.replace(u"ൽ", u"ല്‍")
     text = text.replace(u"ൾ", u"ള്‍")
     text = text.replace(u"ൿ", u"ക്‍")
     text = text.replace(u"ന്‍റ", u"ന്റ")
-    return text   
-    
+    return text
+
 if __name__ == '__main__':
     #add_to_database("hi","hello")
     #get_meaning_from_database("hi")
@@ -91,4 +95,4 @@ if __name__ == '__main__':
     #print get_def('father','ml','ml')
     #print get_def('fathehghghghr','ml','ml')
     #print get_def('fat','ml','ml')
-    print get_def('aaaa','kn_IN','kn_IN').encode('utf-8')
+    print get_def('aaaa', 'kn_IN', 'kn_IN').encode('utf-8')

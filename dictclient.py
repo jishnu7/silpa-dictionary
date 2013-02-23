@@ -18,12 +18,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
-# If you find any bugs or have any suggestions email: santhosh.thottingal@gmail.com
+# If you find any bugs or have any suggestions email:
+# santhosh.thottingal@gmail.com
 # URL: http://www.smc.org.in
 
 from dictdlib import DictDB
-en_ml_db=DictDB("/usr/share/dictd/freedict-eng-mal")
+en_ml_db = DictDB("/usr/share/dictd/freedict-eng-mal")
 print en_ml_db.getdef('help')[0]
-ml_ml_db=DictDB("/usr/share/dictd/dict-ml-ml")
+ml_ml_db = DictDB("/usr/share/dictd/dict-ml-ml")
 print en_ml_db.getdef('ഭയങ്കരം')
-

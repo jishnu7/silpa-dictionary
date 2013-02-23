@@ -16,7 +16,10 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import sys, string, gzip, os
+import sys
+import string
+import gzip
+import os
 
 b64_list = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 url_headword = "00-database-url"
@@ -40,7 +43,8 @@ def b64_encode(val):
         return retval
     else:
         return b64_list[0]
-    
+
+
 def b64_decode(str):
     """Takes as input a string and returns an integer value of it decoded
     with the base64 algorithm used by dict indexes."""
@@ -58,26 +62,29 @@ validdict = {}
 for x in string.ascii_letters + string.digits + " \t":
     validdict[x] = 1
 
+
 def sortnormalize(x):
     """Returns a value such that x is mapped to a format that sorts properly
     with standard comparison."""
     x2 = ''
     for i in range(len(x)):
-        if validdict.has_key(x[i]):
+        if x[i] in validdict:
             x2 += x[i]
     return x2.upper() + "\0" + x.upper()
 
+
 def sortfunc(x, y):
-   """Emulate sort -df."""
-   xl = x.split("\0")
-   yl = y.split("\0")
-   ret = cmp(xl[0], yl[0])
-   if ret != 0:
-       return ret
-   return cmp(xl[1], yl[1])
+    """Emulate sort -df."""
+    xl = x.split("\0")
+    yl = y.split("\0")
+    ret = cmp(xl[0], yl[0])
+    if ret != 0:
+        return ret
+    return cmp(xl[1], yl[1])
+
 
 class DictDB:
-    def __init__(self, basename, mode = 'read', quiet = 0):
+    def __init__(self, basename, mode='read', quiet=0):
         #, url = 'unknown', shortname = 'unknown',
         #         longinfo = 'unknown', quiet = 0):
         """Initialize a DictDB object.
@@ -94,7 +101,7 @@ class DictDB:
 
         Read can read dict or dict.dz files.  Write and update will NOT work
         with dict.dz files.
-        
+
         If quiet is nonzero, status messages
         will be suppressed."""
 
@@ -122,7 +129,7 @@ class DictDB:
         elif mode == 'write':
             self.indexfile = open(self.indexfilename, "wt")
             if self.usecompression:
-                raise ValueError, "'write' mode incompatible with .dz files"
+                raise ValueError("'write' mode incompatible with .dz files")
             else:
                 self.dictfile = open(self.dictfilename, "wb")
         elif mode == 'update':
@@ -140,7 +147,7 @@ class DictDB:
                     self.dictfile = open(self.dictfilename, "w+b")
             self._initindex()
         else:
-            raise ValueError, "mode must be 'read', 'write', or 'update'"
+            raise ValueError("mode must be 'read', 'write', or 'update'")
 
         #self.writeentry(url_headword + "\n     " + url, [url_headword])
         #self.writeentry(short_headword + "\n     " + shortname,
@@ -152,7 +159,7 @@ class DictDB:
         self.indexfile.seek(0)
         for line in self.indexfile.xreadlines():
             splits = line.rstrip().split("\t")
-            if not self.indexentries.has_key(splits[0]):
+            if not splits[0] in self.indexentries:
                 self.indexentries[splits[0]] = []
             self.indexentries[splits[0]].append([b64_decode(splits[1]),
                                                  b64_decode(splits[2])])
@@ -161,11 +168,11 @@ class DictDB:
         """Adds an entry to the index.  word is the relevant word.
         start is the starting position in the dictionary and size is the
         size of the definition; both are integers."""
-        if not self.indexentries.has_key(word):
+        if not word in self.indexentries:
             self.indexentries[word] = []
         self.indexentries[word].append([start, size])
 
-    def delindexentry(self, word, start = None, size = None):
+    def delindexentry(self, word, start=None, size=None):
         """Removes an entry from the index; word is the word to search for.
 
         start and size are optional.  If they are specified, only index
@@ -183,19 +190,19 @@ class DictDB:
 
         Returns a count of the deleted entries."""
 
-        if not self.indexentries.has_key(word):
+        if not word in self.indexentries:
             return 0
         retval = 0
         entrylist = self.indexentries[word]
         for i in range(len(entrylist) - 1, -1, -1):
             # Go backwords so the del doesn't effect the index.
-            if (start == None or start == entrylist[i][0]) and \
-               (size == None or size == entrylist[i][1]):
+            if (start is None or start == entrylist[i][0]) and \
+               (size is None or size == entrylist[i][1]):
                 del(entrylist[i])
                 retval += 1
         if len(entrylist) == 0:         # If we emptied it, del it completely
             del(self.indexentries[word])
-        return retval        
+        return retval
 
     def update(self, string):
         """Writes string out, if not quiet."""
@@ -224,7 +231,6 @@ class DictDB:
         self.delindexentry(info_headword)
         self.addentry(info_headword + "\n" + longinfo, [info_headword])
 
-
     def addentry(self, defstr, headwords):
         """Writes an entry.  defstr holds the content of the definition.
         headwords is a list specifying one or more words under which this
@@ -241,7 +247,7 @@ class DictDB:
         if self.count % 1000 == 0:
             self.update("Processed %d records\r" % self.count)
 
-    def finish(self, dosort = 1):
+    def finish(self, dosort=1):
         """Called to finish the writing process.
         **REQUIRED IF OPENED WITH 'update' OR 'write' MODES**.
         This will write the index and close the files.
@@ -263,18 +269,18 @@ class DictDB:
                                                      b64_encode(thisdef[1])))
 
             self.update(" mapping")
-                
+
             sortmap = {}
             for entry in indexlist:
                 norm = sortnormalize(entry)
-                if sortmap.has_key(norm):
+                if norm in sortmap:
                     sortmap[norm].append(entry)
                     sortmap[norm].sort(sortfunc)
                 else:
                     sortmap[norm] = [entry]
 
             self.update(" listing")
-                
+
             normalizedentries = sortmap.keys()
 
             self.update(" sorting")
@@ -293,7 +299,7 @@ class DictDB:
         self.update("Writing index...\n")
 
         self.indexfile.seek(0)
-            
+
         for entry in indexlist:
             self.indexfile.write(entry + "\n")
 
@@ -311,7 +317,7 @@ class DictDB:
         return self.indexentries.keys()
 
     def hasdef(self, word):
-        return self.indexentries.has_key(word)
+        return word in self.indexentries
 
     def getdef(self, word):
         """Given a definition name, returns a list of strings with all
@@ -324,12 +330,12 @@ class DictDB:
             self.dictfile.seek(start)
             retval.append(self.dictfile.read(length))
         return retval
-            
+
 
 class DictReader:
     """This object provides compatibility with earlier versions
     of dictdlib.  It is now deprecated."""
-    
+
     def __init__(self, basename):
         """Initialize a DictReader object.  Provide it with the basename."""
         self.dictdb = DictDB(basename, 'read')
@@ -344,12 +350,13 @@ class DictReader:
         with all matching definitions."""
         return self.dictdb.getdef(defname)
 
+
 class DictWriter:
     """This object provides compatibility with earlier versions
     of dictdlib.  It is now deprecated."""
 
-    def __init__(self, basename, url = 'unknown', shortname = 'unknown',
-                 longinfo = 'unknown', quiet = 0):
+    def __init__(self, basename, url='unknown', shortname='unknown',
+                 longinfo='unknown', quiet=0):
         """Initialize a DictWriter object.  Will create 'basename.dict' and
         'basename.index' files.  url, shortname, and longinfo specify the
         respective attributes of the database.  If quiet is 1,
@@ -366,7 +373,7 @@ class DictWriter:
         to the end of defstr."""
         self.dictdb.addentry(defstr, headwords)
 
-    def finish(self, dosort = 1):
+    def finish(self, dosort=1):
         """Called to finish the writing process.  **REQUIRED**.
         This will write the index and close the files.
 
@@ -374,4 +381,3 @@ class DictWriter:
         dictlib will not sort the index file.  In this case, you
         MUST manually sort it through "sort -df" before it can be used."""
         self.dictdb.finish(dosort)
-    
