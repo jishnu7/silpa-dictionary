@@ -113,7 +113,6 @@ class Dictionary(SilpaModule):
             return dictdata
         return None
 
-    @ServiceMethod
     def getdef(self, word, dictionary):
         meaningstring = ""
         src = dictionary.split("-")[0]
@@ -131,7 +130,6 @@ class Dictionary(SilpaModule):
             return meaningstring
         return meaningstring.decode("utf-8")
 
-    @ServiceMethod
     def getdef_image(self, word, dictionary, file_type='png', width=0, \
             height=0, color="Black", fontsize=10):
         meaning = self.getdef(word, dictionary)
@@ -142,7 +140,6 @@ class Dictionary(SilpaModule):
             return renderer.render_text(meaning, file_type, width, height, \
                 color, font_size=fontsize)
 
-    @ServiceMethod
     def get_wiktionary_def_image(self, word, dictionary, file_type='png', \
             width=0, height=0, color="Black", fontsize=10):
         tmp = dictionary.split("-")

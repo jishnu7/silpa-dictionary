@@ -21,4 +21,4 @@
 # If you find any bugs or have any suggestions email: santhosh.thottingal@gmail.com
 # URL: http://www.smc.org.in
 
-from dictionary import *
+from dictionary.dictionary import Dictionary, getInstance
